@@ -25,6 +25,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private View mwm_add1;
     private View mwm_add2;
 
+    private WindowLayout mWindowLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,29 +74,39 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 mwm_add2 = createChild("wm_addView(LayoutParams)");
                 mWindowManager.addView(mwm_add2, createSubWindowLayoutParams());
                 Log.e(TAG, "window manger: "+mwm_add2.getLayoutParams());
+
+                mWindowLayout = new WindowLayout(this);
+                mWindowLayout.addView(createChild("window layout"));
+                mWindowLayout.attachWindowManager(mWindowManager);
                 break;
             case R.id.wm_update:
-                mWindowManager.updateViewLayout(mwm_add2, updateWM_add2());
+                if (mwm_add2 != null) {
+                    mWindowManager.updateViewLayout(mwm_add2, updateWM_add2());
+                }
                 break;
 
             case R.id.view_update:
                 if (mvg_add1 != null) {
                     mvg_add1.setLayoutParams(updateVG_add1());
+                    Log.e(TAG, "update mvg_add1: " + mvg_add1.getLayoutParams());
                 }
                 if (mvg_add2 != null) {
                     mvg_add2.setLayoutParams(updateVG_add2());
                     mvg_add2.requestLayout();
+                    Log.e(TAG, "update mvg_add2: " + mvg_add2.getLayoutParams());
                 }
                 // WindowManager View can not update by view.setLayoutParams()
                 if (mwm_add2 != null) {
                     mwm_add2.setLayoutParams(updateWM_add2());
+                    Log.e(TAG, "update mwm_add2: " + mwm_add2.getLayoutParams());
+                }
+                if (mWindowLayout != null) {
+                    mWindowLayout.setLayoutParams(updateWM_windowlayout());
+                    Log.e(TAG, "update mWindowLayout: " + mWindowLayout.getLayoutParams());
                 }
                 Toast.makeText(this, "You can see the view added by windowmanger" +
                         " does not changed when view.setLayoutParams() called!",
                         Toast.LENGTH_LONG).show();
-                Log.e(TAG, "update mvg_add1: " + mvg_add1.getLayoutParams());
-                Log.e(TAG, "update mvg_add2: " + mvg_add2.getLayoutParams());
-                Log.e(TAG, "update mwm_add2: " + mwm_add2.getLayoutParams());
                 break;
         }
     }
@@ -112,10 +124,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 color = Color.RED;
                 break;
             case 2:
-                color = Color.DKGRAY;
+                color = Color.YELLOW;
                 break;
             case 3:
-                color = Color.YELLOW;
+                color = Color.GREEN;
                 break;
         }
         mIndex += 1;
@@ -166,6 +178,22 @@ public class MainActivity extends Activity implements View.OnClickListener {
      * 窗口
      */
     private ViewGroup.LayoutParams updateWM_add2() {
+        View view = mwm_add2;
+        WindowManager.LayoutParams params = (WindowManager.LayoutParams) view.getLayoutParams();
+        if (params.width == ViewGroup.LayoutParams.WRAP_CONTENT ||
+                params.width == ViewGroup.LayoutParams.MATCH_PARENT) {
+            params.width = view.getWidth() + 10;
+        } else {
+            params.width += 10;
+        }
+        return params;
+    }
+
+
+    /**
+     * CWindowLayout
+     */
+    private ViewGroup.LayoutParams updateWM_windowlayout() {
         View view = mwm_add2;
         WindowManager.LayoutParams params = (WindowManager.LayoutParams) view.getLayoutParams();
         if (params.width == ViewGroup.LayoutParams.WRAP_CONTENT ||
